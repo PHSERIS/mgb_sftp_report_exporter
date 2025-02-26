@@ -1,0 +1,219 @@
+{
+	"name": "SFTP Report Exporter",
+
+	"namespace": "MGB\\MGBSFTPReportExporter",
+
+	"description": "An external module to export reports from a REDCap project and deliver them via SFTP to another location.",
+
+    "authors": [
+        {
+            "name": "Dimitar Dimitrov",
+            "email": "edcsupport@partners.org",
+            "institution": "Mass General Brigham"
+        }
+    ],
+
+	"versions": [
+		{
+			"2.5.16": "Adjustments for REDCap scans.",
+			"2.5.15": "Adding documentation information.",
+			"2.5.14": "Fix remote file size handling by adding to return instead of object property.  Also change revision order history to newest to oldest. Fix some javascript message handling and some exception handling.",
+			"2.5.12": "File Size logging added for local and remote. And bumps modification time on the temp file.",
+			"2.5.11": "Add cron manual trigger feature.",
+			"2.5.10": "Fix oversight bug of passing a flag to a function. And improves the flagging logic. Update vendor files for phpseclib.",
+			"2.5.9": "Adding detailed logging for more informative steps of process handling.",
+			"2.5.8": "Adjustment to remedy midnight and early AM crossover.",
+			"2.5.7": "Adjustment to the check for every hour timer to remedy skipped hourly times. Added some logging messages.",
+			"2.5.6": "Add check for strlen when retrieve the report to display putting in fix from 2.5.4 that was missed. Also remove a test stub.",
+			"2.5.5": "Adjustment to every hour timer to remedy skipped hourly times.",
+			"2.5.4": "Fix PHP8 issues issue array keys of -1 and javascript call with an unused param.",
+			"2.5.3": "Fix PHP8 issue non static method being called statically.",
+			"2.5.2": "Fix PHP8 issue with abs function and strings needing typecast to int.",
+			"2.5.1": "Bug fixes and small logging enhancements; new button introduced to enable/disable cron logging",
+			"2.5.0": "Adding the ability to specify file naming patter on the export file; Allowing for files on the remote storage to be overwritten",
+			"2.0.1": "Moving the Manually Trigger CRON button to the control center; fix for the duplicate cron jobs; run report at scheduled hour/time",
+			"2.0.0": "Adding CRON component to this - a way of automating the distribution of reports on a scheduled basis;",
+			"1.5.2": "Adding All Data report",
+			"1.5.1": "Modified the file export name to align more closely with the REDCap Report export naming convention",
+			"1.5.0": "Removed local AWS library dependency as that was clashing with the REDCap one; Using just the REDCap - Libraries AWS library",
+			"1.4.0": "Minor bug fix - removed some debugging code",
+			"1.3.0": "Added the ability to export to S3 as well as SFTP; Also added the ability to export to a local folder that is outside of the webroot (recommended) ! And ability to upload to a specific SFTP remote location/folder",
+			"1.2.0": "Adding the ability to export in EAV format as well as RAW vs Labels export",
+			"1.1.0": "Improvements to security of the credential storing",
+			"1.0.0": "Initial Development (not an official release)"
+		}
+	],
+	
+	"permissions": [
+		"redcap_every_page_top"
+	],
+
+	"crons": [
+		{
+			"cron_name": "extmod_sftp_report_exporter",
+			"cron_description": "Automate report sending via sFTP to sFTP/S3/Local storage",
+			"method": "run_sftp_cron",
+			"cron_frequency": "3600",
+			"cron_max_run_time": "500"
+		}
+	],
+	"no-auth-pages":["mgb_sftp_cron"],
+
+	"links": {
+		"control-center": [
+			{
+				"name": "EM: SFTP Report Exporter",
+				"icon": "gear",
+				"url": "mgb_sftp_control_center_screen.php"
+			},
+			{
+				"name": "EM: SFTP MANUAL RUN",
+				"icon": "gear",
+				"url": "manualrun.php"
+			},
+			{
+				"name": "EM: SFTP SHOW CRON ID",
+				"icon": "gear",
+				"url": "showid.php"
+			},
+			{
+				"name": "EM: SFTP SHOW TEST PAGE",
+				"icon": "gear",
+				"url": "showpage.php"
+			}
+		],
+		"project": [
+			{
+				"name": "Upload report to SFTP",
+				"icon": "gear",
+				"url": "mgb_upload_report_to_sftp.php"
+			},
+			{
+				"name": "Setup SFTP Report Exporter",
+				"icon": "gear",
+				"url": "mgb_setup_sftp.php"
+			}
+		]
+	},
+
+	"system-settings": [
+		{
+			"key": "sftp-salty-salt",
+			"name": "<b>Sodium Sprinkle for security</b>",
+			"required": false,
+			"type": "text",
+			"hidden": true
+		},
+		{
+			"key": "debug_test_send",
+			"name": "Debug Cron SFTP Send (checked is simulate send do not actually send file) <br><b>WARNING THIS IS GLOBAL</b>",
+			"type": "checkbox"
+		},
+		{
+			"key": "sftp-cron-debug",
+			"name": "Debug Cron (checked is show programmer debugging text)",
+			"type": "checkbox"
+		}		
+	],
+
+	"project-settings": [
+		{
+			"key": "sftp-sites",
+			"name": "Setting for SFTP Site",
+			"required": true,
+			"type": "sub_settings",
+			"repeatable":true,
+			"sub_settings":[
+				{
+					"key": "remote-site-type",
+					"name": "<b>Specify a type of remote system (SFTP, S3)</b>",
+					"required": true,
+					"type": "text"
+				},
+				{
+					"key": "sftp-site-name",
+					"name": "<b>Specify a name for the site</b>",
+					"required": true,
+					"type": "text"
+				},
+				{
+					"key": "sftp-site-host",
+					"name": "<b>Specify SFTP Host (ex: sftp.example.com)</b>",
+					"required": true,
+					"type": "text"
+				},
+				{
+					"key": "sftp-site-port",
+					"name": "<b>Specify SFTP Port (ex: 22)</b>",
+					"required": true,
+					"type": "text"
+				},
+				{
+					"key": "sftp-site-user",
+					"name": "<b>Specify SFTP Username (ex: sftpuser)</b>",
+					"required": true,
+					"type": "text"
+				},
+				{
+					"key": "sftp-site-auth-method",
+					"name": "How do you authenticate",
+					"required": true,
+					"type": "radio",
+					"choices": [
+						{
+							"value": "1",
+							"name": "With Username and Password"
+						},
+						{
+							"value": "2",
+							"name": "With Username and public/private keys"
+						}
+					]
+				},
+				{
+					"key": "sftp-site-pwd",
+					"name": "<b>Specify SFTP password (ex: Password1)</b>",
+					"required": false,
+					"type": "text",
+					"hidden": true
+				},
+				{
+					"key": "sftp-site-pk",
+					"name": "<b>Paste complete private key (ex: -----BEGIN RSA PRIVATE KEY-----...)</b>",
+					"required": false,
+					"type": "textarea",
+					"hidden": true 
+				},
+				{
+					"key": "sftp-site-folder",
+					"name": "<b>Specify Remote Folder (ex: /output)</b>",
+					"required": false,
+					"type": "text",
+					"hidden": true
+				},
+				{
+					"key": "s3-bucket-name",
+					"name": "<b>Specify S3 Bucket (ex: mysecretbucket)</b>",
+					"required": false,
+					"type": "text",
+					"hidden": true
+				},
+				{
+					"key": "s3-region-name",
+					"name": "<b>Specify S3 Region (ex: us-east-1)</b>",
+					"required": false,
+					"type": "text",
+					"hidden": true
+				}
+			]
+		},
+		{
+			"key": "project_report_schedules",
+			"name": "JSON with report schedules",
+			"required": false,
+			"type": "textarea",
+			"repeatable": false,
+			"hidden": true
+		}
+	]
+}
