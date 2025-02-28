@@ -280,8 +280,8 @@ else {
             'title' => "Schedule Report Delivery for report to " . trim(strip_tags(html_entity_decode($target_names[$cfg], ENT_QUOTES))),
             'num' => $cfg,
         ];
-        //print json_encode($this->escape($result));
-        //print $this->escape(json_encode($result)); // TODO: Psalm wants to do this.  Is it safe to do so?
+        //print json_encode($module->escape($result));
+        //print $module->escape(json_encode($result)); // TODO: Psalm wants to do this.  Is it safe to do so?
 
         exit();
     } else {
@@ -289,7 +289,10 @@ else {
             'status' => 'ERROR',
             'status_message' => 'Please try again',
         ];
-        print json_encode($this->escape($result));
+        
+        $result = json_encode($result);
+        print $module->escape($result);
+        //print json_encode($module->escape($result));
         exit();
     }
 }

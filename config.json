@@ -15,6 +15,7 @@
 
 	"versions": [
 		{
+			"2.5.17": "Correct referencing methods this to module.",
 			"2.5.16": "Adjustments for REDCap scans.",
 			"2.5.15": "Adding documentation information.",
 			"2.5.14": "Fix remote file size handling by adding to return instead of object property.  Also change revision order history to newest to oldest. Fix some javascript message handling and some exception handling.",
